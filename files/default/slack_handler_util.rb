@@ -5,8 +5,12 @@ class SlackHandlerUtil
   end
 
   def start_message(context = {})
-    "Chef run started on #{node_details(context)}" \
-    "#{run_status_cookbook_detail(context)}"
+    if context['start_message']
+      context['start_message']
+    else
+      "Chef run started on #{node_details(context)}" \
+      "#{run_status_cookbook_detail(context)}"
+    end
   end
 
   def end_message(context = {})

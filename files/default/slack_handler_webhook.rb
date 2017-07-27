@@ -80,7 +80,7 @@ class Chef::Handler::Slack < Chef::Handler
   end
 
   def slack_message(messages, webhook)
-    Chef::Log.debug("Sending slack message #{messages} to webhook #{webhook}")
+    Chef::Log.info("Sending slack message #{messages} to webhook #{webhook}")
     uri = URI.parse(webhook)
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
@@ -92,6 +92,7 @@ class Chef::Handler::Slack < Chef::Handler
     # "Bad token"
     # "invalid_payload"
     # "ok"
+    Chef::Log.info("Response: #{res.body}")
     raise res.body unless res.body == 'ok'
   end
 

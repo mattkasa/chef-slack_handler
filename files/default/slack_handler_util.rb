@@ -8,7 +8,8 @@ class SlackHandlerUtil
 
   def start_message(context = {})
     { color: 'warning',
-      pretext: context['start_message'] || default_config[:start_message],
+      mrkdwn_in: ['title'],
+      title: context['start_message'] || default_config[:start_message],
       fallback: context['start_message'] || default_config[:start_message],
       fields: [
         custom_details(context),
@@ -16,14 +17,14 @@ class SlackHandlerUtil
         organization_details(context),
         environment_details(context),
         cookbook_details(context)
-      ].flatten.compact,
-      ts: run_status.start_time.to_i }
+      ].flatten.compact }
   end
 
   # message sent on a successful run
   def success_message(context = {})
     { color: 'good',
-      pretext: context['success_message'] || default_config[:success_message],
+      mrkdwn_in: ['title'],
+      title: context['success_message'] || default_config[:success_message],
       fallback: context['success_message'] || default_config[:success_message],
       fields: [
         custom_details(context),
@@ -42,7 +43,8 @@ class SlackHandlerUtil
   # message sent on a failed run
   def failure_message(context = {})
     { color: 'danger',
-      pretext: context['failure_message'] || default_config[:failure_message],
+      mrkdwn_in: ['title'],
+      title: context['failure_message'] || default_config[:failure_message],
       fallback: context['failure_message'] || default_config[:failure_message],
       fields: [
         custom_details(context),

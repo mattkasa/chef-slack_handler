@@ -1,4 +1,6 @@
 class SlackHandlerUtil
+  attr_reader :run_status, :default_config
+
   def initialize(default_config, run_status)
     @default_config = default_config
     @run_status = run_status
@@ -6,7 +8,7 @@ class SlackHandlerUtil
 
   def start_message(context = {})
     { color: 'warning',
-      pretext: context['start_message'] || @default_config[:start_message],
+      pretext: context['start_message'] || default_config[:start_message],
       fields: [
         custom_details(context),
         node_details(context),
@@ -20,7 +22,7 @@ class SlackHandlerUtil
   # message sent on a successful run
   def success_message(context = {})
     { color: 'good',
-      pretext: context['success_message'] || @default_config[:success_message],
+      pretext: context['success_message'] || default_config[:success_message],
       fields: [
         custom_details(context),
         node_details(context),
@@ -38,7 +40,7 @@ class SlackHandlerUtil
   # message sent on a failed run
   def failure_message(context = {})
     { color: 'danger',
-      pretext: context['failure_message'] || @default_config[:failure_message],
+      pretext: context['failure_message'] || default_config[:failure_message],
       fields: [
         custom_details(context),
         node_details(context),
@@ -55,12 +57,12 @@ class SlackHandlerUtil
 
   def fail_only(context = {})
     return context['fail_only'] unless context['fail_only'].nil?
-    @default_config[:fail_only]
+    default_config[:fail_only]
   end
 
   def send_on_start(context = {})
     return context['send_start_message'] unless context['send_start_message'].nil?
-    @default_config[:send_start_message]
+    default_config[:send_start_message]
   end
 
   private
@@ -70,7 +72,7 @@ class SlackHandlerUtil
   end
 
   def elapsed_time(context = {})
-    return if (context['message_detail_level'] || @default_config[:message_detail_level]) == 'basic'
+    return if (context['message_detail_level'] || default_config[:message_detail_level]) == 'basic'
     slack_field(title: 'Elapsed Time', value: Time.at(run_status.elapsed_time).utc.strftime("%H:%M:%S"), short: true)
   end
 
@@ -78,27 +80,23 @@ class SlackHandlerUtil
     slack_field(title: 'Started', value: run_status.start_time.to_s, short: true)
   end
 
-  def node
-    @run_status.node
-  end
-
   def node_details(_context = {})
-    slack_field(title: 'Node', value: node.name, short: true)
+    slack_field(title: 'Node', value: run_status.node.name, short: true)
   end
 
   def environment_details(context = {})
     if context['send_environment'].nil?
-      return unless @default_config[:send_environment]
+      return unless default_config[:send_environment]
     else
       return unless context['send_environment']
     end
 
-    slack_field(title: 'Environment', value: node.chef_environment, short: true)
+    slack_field(title: 'Environment', value: run_status.node.chef_environment, short: true)
   end
 
   def organization_details(context = {})
     if context['send_organization'].nil?
-      return unless @default_config[:send_organization]
+      return unless default_config[:send_organization]
     else
       return unless context['send_organization']
     end
@@ -107,7 +105,7 @@ class SlackHandlerUtil
   end
 
   def cookbook_details(context = {})
-    return unless (context['cookbook_detail_level'] || @default_config[:cookbook_detail_level]) == 'all'
+    return unless (context['cookbook_detail_level'] || default_config[:cookbook_detail_level]) == 'all'
     slack_field(title: 'Cookbooks', value: run_context.cookbook_collection.values.map { |cookbook| "#{cookbook.name} #{cookbook.version}" }.join(", "))
   end
 

@@ -33,6 +33,8 @@ default_unless['chef_client']['handler']['slack']['webhooks']['name'] = []
 # default['chef_client']['handler']['slack']['webhooks']['webhook1']['cookbook_detail_level'] = nil
 # default['chef_client']['handler']['slack']['webhooks']['webhook1']['send_environment'] = nil
 
+# default['chef_client']['handler']['slack']['webhooks']['webhook']['custom_fields'] = [ {title: title, value: value, short: true | false} ]
+
 # shared attributes
 default['chef_client']['handler']['slack']['timeout']    = 15
 default['chef_client']['handler']['slack']['username']   = nil
@@ -49,3 +51,7 @@ default['chef_client']['handler']['slack']['fail_only'] = false
 default['chef_client']['handler']['slack']['send_start_message'] = false
 # Whether to send a message the node.chef_environment as well as the node.name
 default['chef_client']['handler']['slack']['send_environment'] = false
+
+default['chef_client']['handler']['slack']['success_message'] = ':white_check_mark: Chef run succeeded'
+default['chef_client']['handler']['slack']['failure_message'] = ':skull: Chef run failed'
+default['chef_client']['handler']['slack']['started_message'] = ':gear: Chef run started'

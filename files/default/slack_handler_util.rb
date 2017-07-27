@@ -5,17 +5,52 @@ class SlackHandlerUtil
   end
 
   def start_message(context = {})
-    if context['start_message']
-      context['start_message']
-    else
-      "Chef run started on #{node_details(context)}" \
-      "#{run_status_cookbook_detail(context)}"
-    end
+    { color: 'warning',
+      pretext: context['start_message'] || @default_config[:start_message],
+      fields: [
+        custom_details(context),
+        node_details(context),
+        organization_details(context),
+        environment_details(context),
+        run_status_cookbook_detail(context)
+      ].flatten.compact,
+      ts: run_status.start_time.to_i }
   end
 
-  def end_message(context = {})
-    "Chef run #{run_status_human_readable} on #{node_details(context)}" \
-    "#{run_status_cookbook_detail(context)}#{run_status_message_detail(context)}"
+  # message sent on a successful run
+  def success_message(context = {})
+    { color: 'good',
+      pretext: context['success_message'] || @default_config[:success_message],
+      fields: [
+        custom_details(context),
+        node_details(context),
+        organization_details(context),
+        environment_details(context),
+        start_time(context),
+        elapsed_time(context),
+        resource_details(context),
+        cookbook_details(context)
+      ].flatten.compact,
+      ts: run_status.end_time.to_i }
+  end
+  alias end_message success_message
+
+  # message sent on a failed run
+  def failure_message(context = {})
+    { color: 'danger',
+      pretext: context['failure_message'] || @default_config[:failure_message],
+      fields: [
+        custom_details(context),
+        node_details(context),
+        organization_details(context),
+        environment_details(context),
+        start_time(context),
+        elapsed_time(context),
+        resource_details(context),
+        cookbook_details(context),
+        exception_details(context)
+      ].flatten.compact,
+      ts: run_status.end_time.to_i }
   end
 
   def fail_only(context = {})
@@ -30,42 +65,58 @@ class SlackHandlerUtil
 
   private
 
+  def exception_details(_context)
+    slack_field(title: 'Exception', value: run_status.exception.message)
+  end
+
+  def elapsed_time(context = {})
+    return if (context['message_detail_level'] || @default_config[:message_detail_level]) == 'basic'
+    slack_field(title: 'Elapsed Time', value: Time.at(run_status.elapsed_time).utc.strftime("%H:%M:%S"), short: true)
+  end
+
+  def start_time(_context)
+    slack_field(title: 'Started', value: run_status.start_time.to_s, short: true)
+  end
+
   def node
     @run_status.node
   end
 
-  def run_status_human_readable
-    @run_status.success? ? 'succeeded' : 'failed'
-  end
-
-  def node_details(context = {})
-    "#{organization_details(context)}#{environment_details(context)}node #{node.name}"
+  def node_details(_context = {})
+    slack_field(title: 'Node', value: node.name, short: true)
   end
 
   def environment_details(context = {})
-    return "env #{node.chef_environment}, " if context['send_environment'] || @default_config[:send_environment]
+    if context['send_environment'].nil?
+      return unless @default_config[:send_environment]
+    else
+      return unless context['send_environment']
+    end
+
+    slack_field(title: 'Environment', value: node.chef_environment, short: true)
   end
 
   def organization_details(context = {})
+    if context['send_organization'].nil?
+      return unless @default_config[:send_organization]
+    else
+      return unless context['send_organization']
+    end
     organization = File.file?('/etc/chef/client.rb') ? File.open('/etc/chef/client.rb').read.match(%r{(?<=\/organizations\/)(\w+-?\w+)}) : "Organization not found in client.rb"
-    return "org #{organization}, " if context['send_organization'] || @default_config[:send_organization]
+    slack_field(title: 'Organization', value: organization, short: true)
   end
 
-  def run_status_cookbook_detail(context = {})
-    case context['cookbook_detail_level'] || @default_config[:cookbook_detail_level]
-    when "all"
-      cookbooks = run_context.cookbook_collection
-      " using cookbooks #{cookbooks.values.map { |x| x.name.to_s + ' ' + x.version }}"
-    end
+  def cookbook_details(context = {})
+    return unless (context['cookbook_detail_level'] || @default_config[:cookbook_detail_level]) == 'all'
+    slack_field(title: 'Cookbooks', value: run_context.cookbook_collection.values.map { |cookbook| "#{cookbook.name} #{cookbook.version}" }.join(", "))
   end
 
-  def run_status_message_detail(context = {})
-    updated_resources = @run_status.updated_resources
-    case context['message_detail_level'] || @default_config[:message_detail_level]
-    when "elapsed"
-      " (#{@run_status.elapsed_time} seconds). #{updated_resources.count} resources updated" unless updated_resources.nil?
-    when "resources"
-      " (#{@run_status.elapsed_time} seconds). #{updated_resources.count} resources updated \n #{updated_resources.join(', ')}" unless updated_resources.nil?
-    end
+  def slack_field(title:, value:, short: false)
+    { title: title, value: value, short: short }
+  end
+
+  # using cookbook can inject slack fields by adding them to the webhook attribute under the 'custom_fields' key
+  def custom_details(context = {})
+    context['custom_fields']
   end
 end

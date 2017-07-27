@@ -76,7 +76,7 @@ class SlackHandlerUtil
     slack_field(title: 'Elapsed Time', value: Time.at(run_status.elapsed_time).utc.strftime("%H:%M:%S"), short: true)
   end
 
-  def start_time(_context)
+  def start_time(_context = {})
     slack_field(title: 'Started', value: run_status.start_time.to_s, short: true)
   end
 
@@ -102,6 +102,11 @@ class SlackHandlerUtil
     end
     organization = File.file?('/etc/chef/client.rb') ? File.open('/etc/chef/client.rb').read.match(%r{(?<=\/organizations\/)(\w+-?\w+)}) : "Organization not found in client.rb"
     slack_field(title: 'Organization', value: organization, short: true)
+  end
+
+  def resource_details(context = {})
+    return unless (context['message_detail_level'] || default_config[:message_detail_level]) == 'resources'
+    slack_field(title: 'Resources', value: run_context.updated_resources.join(', '))
   end
 
   def cookbook_details(context = {})

@@ -8,8 +8,8 @@ class SlackHandlerUtil
 
   def start_message(context = {})
     { color: 'warning',
-      mrkdwn_in: ['title'],
-      title: context['start_message'] || default_config[:start_message],
+      mrkdwn_in: ['text', 'fields'],
+      text: context['start_message'] || default_config[:start_message],
       fallback: context['start_message'] || default_config[:start_message],
       fields: [
         custom_details(context),
@@ -23,8 +23,8 @@ class SlackHandlerUtil
   # message sent on a successful run
   def success_message(context = {})
     { color: 'good',
-      mrkdwn_in: ['title'],
-      title: context['success_message'] || default_config[:success_message],
+      mrkdwn_in: ['text', 'fields'],
+      text: context['success_message'] || default_config[:success_message],
       fallback: context['success_message'] || default_config[:success_message],
       fields: [
         custom_details(context),
@@ -43,8 +43,8 @@ class SlackHandlerUtil
   # message sent on a failed run
   def failure_message(context = {})
     { color: 'danger',
-      mrkdwn_in: ['title'],
-      title: context['failure_message'] || default_config[:failure_message],
+      mrkdwn_in: ['text', 'fields'],
+      text: context['failure_message'] || default_config[:failure_message],
       fallback: context['failure_message'] || default_config[:failure_message],
       fields: [
         custom_details(context),
@@ -73,7 +73,7 @@ class SlackHandlerUtil
   private
 
   def exception_details(_context)
-    slack_field(title: 'Exception', value: run_status.exception.message)
+    slack_field(title: 'Exception', value: "`#{run_status.exception.message}`")
   end
 
   def elapsed_time(context = {})

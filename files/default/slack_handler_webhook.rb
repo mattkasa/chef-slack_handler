@@ -79,7 +79,7 @@ class Chef::Handler::Slack < Chef::Handler
     end
   end
 
-  def slack_message(webhook, messages)
+  def slack_message(messages, webhook)
     Chef::Log.debug("Sending slack message #{messages} to webhook #{webhook}")
     uri = URI.parse(webhook)
     http = Net::HTTP.new(uri.host, uri.port)

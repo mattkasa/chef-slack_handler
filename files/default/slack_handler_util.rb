@@ -28,7 +28,7 @@ class SlackHandlerUtil
         node_details(context),
         organization_details(context),
         environment_details(context),
-        start_time(context),
+        start_time_details(context),
         elapsed_time(context),
         resource_details(context),
         cookbook_details(context)
@@ -46,7 +46,7 @@ class SlackHandlerUtil
         node_details(context),
         organization_details(context),
         environment_details(context),
-        start_time(context),
+        start_time_details(context),
         elapsed_time(context),
         resource_details(context),
         cookbook_details(context),
@@ -76,7 +76,7 @@ class SlackHandlerUtil
     slack_field(title: 'Elapsed Time', value: Time.at(run_status.elapsed_time).utc.strftime("%H:%M:%S"), short: true)
   end
 
-  def start_time(_context = {})
+  def start_time_details(_context = {})
     slack_field(title: 'Started', value: run_status.start_time.to_s, short: true)
   end
 

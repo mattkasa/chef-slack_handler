@@ -12,7 +12,7 @@ class SlackHandlerUtil
         node_details(context),
         organization_details(context),
         environment_details(context),
-        run_status_cookbook_detail(context)
+        cookbook_details(context)
       ].flatten.compact,
       ts: run_status.start_time.to_i }
   end

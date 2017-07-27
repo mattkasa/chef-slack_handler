@@ -80,13 +80,13 @@ class Chef::Handler::Slack < Chef::Handler
   end
 
   def slack_message(messages, webhook)
-    Chef::Log.info("Sending slack message #{messages} to webhook #{webhook}")
     uri = URI.parse(webhook)
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     req = Net::HTTP::Post.new(uri.path, 'Content-Type' => 'application/json')
     req.body = request_body(messages)
+    Chef::Log.info("Sending slack message #{req.body} to webhook #{webhook}")
     res = http.request(req)
     # responses can be:
     # "Bad token"
@@ -106,7 +106,7 @@ class Chef::Handler::Slack < Chef::Handler
       body[:icon_emoji] = @icon_emoji
     end
     body[:channel] = @channel if @channel
-    body[:attachments] = messages
+    body[:attachments] = [messages]
     body.to_json
   end
 end

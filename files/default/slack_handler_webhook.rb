@@ -40,7 +40,6 @@ class Chef::Handler::Slack < Chef::Handler
   end
 
   def setup_run_status(run_status)
-    Chef::Log.info("Run Status: #{run_status.inspect}")
     @run_status = run_status
     @util = SlackHandlerUtil.new(@config, @run_status)
   end

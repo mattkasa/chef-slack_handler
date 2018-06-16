@@ -111,12 +111,12 @@ class SlackHandlerUtil
 
   def resource_details(context = {})
     return unless (context['message_detail_level'] || default_config[:message_detail_level]) == 'resources'
-    slack_field(title: 'Resources', value: run_context.updated_resources.join(', '))
+    slack_field(title: 'Resources', value: (Chef.respond_to?(:run_context) ? Chef.run_context : run_context).updated_resources.join(', '))
   end
 
   def cookbook_details(context = {})
     return unless (context['cookbook_detail_level'] || default_config[:cookbook_detail_level]) == 'all'
-    slack_field(title: 'Cookbooks', value: run_context.cookbook_collection.values.map { |cookbook| "#{cookbook.name}@#{cookbook.version}" }.join(", "))
+    slack_field(title: 'Cookbooks', value: (Chef.respond_to?(:run_context) ? Chef.run_context : run_context).cookbook_collection.values.map { |cookbook| "#{cookbook.name}@#{cookbook.version}" }.join(", "))
   end
 
   def slack_field(title:, value:, short: false)

@@ -111,7 +111,7 @@ class SlackHandlerUtil
 
   def resource_details(context = {})
     return unless (context['message_detail_level'] || default_config[:message_detail_level]) == 'resources'
-    slack_field(title: 'Resources', value: (Chef.respond_to?(:run_context) ? Chef.run_context : run_context).updated_resources.join(', '))
+    slack_field(title: 'Resources', value: run_status.updated_resources.join(', '))
   end
 
   def cookbook_details(context = {})

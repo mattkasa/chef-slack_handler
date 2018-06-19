@@ -73,7 +73,7 @@ class SlackHandlerUtil
   private
 
   def exception_details(_context)
-    slack_field(title: 'Exception', value: "```\n#{run_status.exception.message.truncate(1500)}\n```")
+    slack_field(title: 'Exception', value: "```\n#{run_status.exception.message}\n```")
   end
 
   def elapsed_time(context = {})
